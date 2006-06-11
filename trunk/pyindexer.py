@@ -1,6 +1,6 @@
 #! /usr/bin/python
-#coding: utf-8
-#
+# -*- coding: utf-8 -*-
+
 # Der Indexer der pythonDesktopSearch
 # (c) by SigMA 2006
 # -----------------------------------

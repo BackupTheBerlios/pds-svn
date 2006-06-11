@@ -1,5 +1,5 @@
 #! /usr/bin/python
-#coding: utf-8
+# -*- coding: utf-8 -*-
 
 # PythonDesktopSearch is under the GPL
 # (c) by SigMA 2006 - http://www.sigma.us.ms

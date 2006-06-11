@@ -1,5 +1,5 @@
-#coding: utf-8
-#
+# -*- coding: utf-8 -*-
+
 # Config File für die PythonDesktopSearch
 
 version = "0.1" # Es ist ziemlich unnütz diese Variable zu ändern^^ Also mach es nicht! ;)
