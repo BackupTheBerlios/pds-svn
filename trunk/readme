@@ -1,0 +1,34 @@
+PythonDesktopSearch
+(c) by SigMA 2006
+Herrausgegeben unter der
+GPL v2
+
+http://pds.berlios.de
+
+So geht es:
+    > überprüfen Sie die config.py
+    > starten Sie pyindex.py
+      > warten sie ca 4 Minuten
+    > starten Sie dann die pysearch.py
+        > mit -cmd für die interne CommandLine
+        > mit --search SUCHWORT für die direkt suche
+
+System Anforderungen:
+    50MB Speicherplatz (reicht für ca 250.000 Dateien + Cache Dateien)
+    Python 2.4
+    80 MB RAM
+
+Changelog:
+    11.06.06 - Version 0.1
+    > Optimierung der Prozesse
+    > leichte Änderungen am Design
+    > ordentliche Readme
+    > Auslagerung der Blacklist in die config.py
+    > eingebauter Versions Check
+    > Anlegung einer ToDo Liste ^^
+    
+    09.06.06 - Version 0.1 beta
+    > Die erste funktionierende Version
+
+Bekannte Bugs:
+    > Dateien mit ' werden nicht indexiert
