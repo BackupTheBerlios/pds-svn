@@ -25,18 +25,14 @@ import re, time, cPickle, os, sys
 
 class pydesksearch:
     def __init__(self):
-        self.db = pydsdb()
-        self.keywords = []
-        self.files = []
         starttime = time.time()
-        if os.path.exists("file.cache") == False or os.path.exists("keywords.cache") == False:
-            cout("Keine Cache Datei gefunden! Erstelle neues SearchIndex")
-            self.new_search_index()
-            if cache == True:
-                self.cache("save")
+        if os.path.exists("index.pds") == False:
+            cout("Erstellen Sie bitte zuerst ein SearchIndex mit dem pyindexer\n\
+Bevor Sie die Search starten!")
+            sys.exit("Exit: Kein SearchIndex")
         else:
-            cout("Cache Datei gefunden!")
-            self.cache("load")
+            cout("SearchIndex gefunden!")
+            self.index("load")
         end = time.time() - starttime
         print "In "+str(end)+" Sekunden"
     def stopwatch(self,command):
@@ -44,43 +40,24 @@ class pydesksearch:
             self.startzeit = time.time()
         elif command == "stop":
             return(time.time()-self.startzeit)
-
-    def new_search_index(self, asdf="wasistsechsmultipliziertmitneun"):
-        self.files = []
-        self.keywords = []
-        self.stopwatch("go")
-        alldata = self.db.showall()
-        for i in alldata:
-                self.files.append(i[0])
-                self.keywords.append(i[1])
-        del alldata
-        cout("In "+str(self.stopwatch("stop"))+" Sekunden Daten ausgelesen")
-        if cache == True and asdf == "new_index":
-            self.cache("save")
-        cout("Neues SuchIndex erstellt")
-    def cache(self, what):
+    def index(self, what):
         """
-        Diese Funktion cached die DB in 2 Dateien
-        keywords.cache
-        files.cache
-        so können die Daten schneller ausgelesen werden
+        Diese Datei lädt das Index und spaltet es
+        in die beiden Variablen
+        self.files
+        self.keywords
         """
-        if what == "save":
-            cout("Starte schreiben von Cache Datei ...")
-            self.stopwatch("go")
-            ffile = open("file.cache", "w")
-            fkey = open("keywords.cache", "w")
-            cPickle.dump(self.files, ffile,-1)
-            cPickle.dump(self.keywords, fkey,-1)
-            cout("Daten in "+str(self.stopwatch("stop"))+" Sekunden geschrieben!")
-        elif what == "load":
-            ffile = open("file.cache", "r",-1)
-            fkey = open("keywords.cache", "r",-1)
-            self.files = cPickle.load(ffile)
-            self.keywords = cPickle.load(fkey)
+        ffile = open("index.pds", "r",-1)
+        db = cPickle.load(ffile)
+        self.files = db[0]
+        self.keywords = db[1]
         ffile.close()
-        fkey.close()
     def search(self, anfrage):
+        """
+        Die Suchfunktion. Diese Funktion kann eigentlich für jedes
+        beliebige Programm benutzt werden, welches eine Suchfunktion
+        für die Festplatte braucht
+        """
         anfrage = anfrage.rstrip()
         page = []
         # Hier wird die Anfrage bearbeitet!
@@ -93,12 +70,17 @@ class pydesksearch:
         starttime = time.time()
         for i in keywords:
             if speed_len(re.compile(anfrage,re.IGNORECASE).findall(i)) >= 1:
-                page.append(files[filecount].replace(anfrage,RED+anfrage+RESET))
+                if color == True:
+                    page.append(files[filecount].replace(anfrage,RED+anfrage+RESET))
+                else:
+                    page.append(files[filecount])
                 treffer += 1
             filecount += 1
         cout("... fertig\n")
         del keywords
         del files
+        seitenanzahl = len(page) / treffer_page
+        aktuell_seite = 0
         end = time.time() - starttime
         count = 0
         tmp_count = 0
@@ -106,9 +88,13 @@ class pydesksearch:
         for i in page:
             cout(i)
             tmp_count += 1
-            if tmp_count >= treffer_page:
+            if tmp_count >= treffer_page and show_page == True:
+                aktuell_seite += 1
+                print ">> Seite "+str(aktuell_seite)+" von "+str(seitenanzahl)+" Seiten <<"
                 print ">> Enter für die nächsten "+str(treffer_page)+" Treffer <<"
-                raw_input()
+                print ">> Q [enter] für ein Vorzeitiges Beenden der Ergebnisse <<"
+                if raw_input() == "q" or raw_input=="Q":
+                    break
                 tmp_count = 0
         cout("||"+"="*25+"PythonDesktopSearch"+"="*25+"||")
         cout("""||"""+"""="""*38+"""||\n||\t"""+str(filecount) + """ Datein durchsucht\t||
@@ -135,32 +121,33 @@ bitte die aktuelle Version von http://www.python.org","hinweis")
     if argv[1] == "--new_cache":
         pds = pydesksearch()
         new_index()
-    elif argv[1] == "--search":
+    elif argv[1] == "--search" or argv[1] == "-s":
         pds = pydesksearch()
         pds.search(liste2string(argv[2:]))
     elif argv[1] == "-cmd":
         pds = pydesksearch()
+        anfrage = " "
         while 1:
-            cout("\nIhre Suchanfrage (in RE)?")
+            if anfrage != "":
+                cout("\nIhre Suchanfrage (in RE)? ('/quit' zum Beenden)")
             anfrage = raw_input("?> ")
-            if anfrage == "/new_cache":
-                new_cache()
-            elif anfrage == "/quit":
+            if anfrage == "/quit":
                 break
             elif anfrage == "":
                 pass
             else:
                 pds.search(anfrage)
-            cout("Bis zum nächsten mal!", "info")
     elif argv[1] == "-gpl":
         f = open("gpl.txt", "r")
         print f.read()
         f.close()
     elif argv[1] == "--help" or argv[1] == "-?" or argv[1] == "-h":
-        cout("\n\tPythonDesktopSearch"+RESET+" Commandline\n   (c) by SigMA 2006 \
-under the term of the GPL\n\t\tversion: "+version+"\
-\n\n--search SUCHWORT\tSucht nach SUCHWORT\n\
---new_cache\t\terstellt neue Cache Dateien\n-cmd\t\t\tStartet mit einer \
-Commandline\n-gpl\t\t\tZeigt ihnen die GPLv2\n")
+        cout("""\n\tPythonDesktopSearch"+RESET+" Commandline
+   (c) by SigMA 2006 under the term of the GPL
+\t\tversion: """+version+"""
+\n-s --search SUCHWORT\tSucht nach SUCHWORT
+-cmd\t\t\tStartet mit einer Commandline
+-gpl\t\t\tZeigt ihnen die GPLv2
+\n""")
     else:
         cout("\nUnbekannter Befehl\nVersuchen Sie --help für mehr Informationen\n")

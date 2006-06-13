@@ -7,15 +7,11 @@ import sqlite, os, lyp
 
 class pydsdb:
     def __init__(self):
-        foo = 0
-        if os.path.exists("index.db") != 1:
-            foo = 1
-        self.con = sqlite.connect('index.db')
-        self.cur = self.con.cursor()
-        if foo == 1:
+        if not os.path.exists("index.db"):
             # Erstellt die Tabelle
             self.cur.execute('CREATE TABLE pds(file VARCHAR(100), keywords VARCHAR(50))')
-            self.do()
+        self.con = sqlite.connect('index.db')
+        self.cur = self.con.cursor()
     def add(self, filename, keywords):
         # Fügt etwas hinzu
         self.cur.execute("INSERT INTO pds(file, keywords) VALUES ('"+filename+"', '"+keywords+"')")

@@ -1,6 +1,6 @@
 #! /usr/bin/python
 # -*- coding: utf-8 -*-
-
+#
 # Der Indexer der pythonDesktopSearch
 # (c) by SigMA 2006
 # -----------------------------------
@@ -15,11 +15,9 @@
 # Die Keywords sollen dynamisch generiert werden^^
 
 # IMPORT
-import os, re, time
-#from ID3 import *
+import os, re, time, cPickle
 from db import *
 from config import *
-# import cPickle as pickle
 # / IMPORT
 
 # ToDo
@@ -31,55 +29,41 @@ from config import *
     ## mal abklären, ob das gut ist^^
 
 class indexer:
+    """
+    Indexer der PythonDesktopSearch
+    """
     def __init__(self):
-        # Hier wird später geschaut, wo er als letztes war
         self.files = []
         self.keywords = []
-        self.db = pydsdb()
     def makelist(self, arg, dirname, files):
         if self.checkblacklist(dirname) == 1:
+            keywords = self.keywords # |- Speed
+            filesback = self.files   # |- Hack
             for i in files:
-                self.files.append(dirname+os.sep+i)
-                # Hier kommt später das Keyword-Tool rein
-                # nach dem Prinzip:
-                # > if XFileType:
-                    # generate keyword
-                # else: key = i
+                filesback.append(dirname+os.sep+i)
                 key = i
-                self.keywords.append(key)
+                keywords.append(key)
+            self.keywords = keywords # |- Speed
+            self.filesback = files   # |- Hack
+            del keywords
+            del files
     def scan(self):
-        self.db.sql("DROP TABLE pds",1)
         print "start walking ..."
         stopwalk = time.time()
         os.path.walk("/", self.makelist, "")
         endwalk = time.time() - stopwalk
         print "... Fertig nach "+str(endwalk)+" Sekunden"
-        print "Schreibe DB ..."
+        print "Schreibe index.pds  ..."
         stopwalk = time.time()
-        count = 0
-        self.db.sql("CREATE TABLE pds(file VARCHAR(100), keywords VARCHAR(100))")
-        lstr = str               # -|
-        files = self.files       # -| Speed Hack
-        keywords = self.keywords # -|
-        del self.files
-        del self.keywords
-        for i in xrange(len(files)):
-            try:
-                # replace("'","\\'") geht irgendwie nicht mit dem gewünschten
-                # erfolg
-                self.db.add(files[i],keywords[i])
-            except:
-                pass # Wenn ein Fehler > ignoriere ihn^^
-            if count == commit:
-                self.db.do()
-                count = 0
-            count += 1
-        self.db.do()
+        dblist = []
+        dblist.append(self.files)
+        dblist.append(self.keywords)
+        ffile = open("index.pds", "w")
+        cPickle.dump(dblist, ffile,-1)
+        ffile.close()
         endwalk = time.time() - stopwalk
-        print "... Fertig nach "+str(endwalk)+" Sekunden"
-        print lstr(len(files))+" Dateien indexiert"
-        del files
-        del keywords
+        print "... Fertig nach "+str(round(endwalk, 3))+" Sekunden"
+        print str(len(self.files))+" Dateien indexiert"
     def checkblacklist(self, dirname):
         to_return = 1
         for black in blacklist:
