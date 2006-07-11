@@ -1,27 +1,33 @@
-#coding: utf-8
+# -*- coding: utf-8 -*-
 #
 # Config File für die PythonDesktopSearch
 
-version = "0.1.1"    # Es ist ziemlich unnütz diese Variable zu ändern^^
-                     # Also mach es nicht! ;)
-
-commit = 1000000     # Nach wie viel Dateien ein commit?
-                     # Je hoher desto schneller desto unsicherer
-
-show_page = False    # Zeigt die Box mit "Seite X von X"
-                     # wenn false macht er auch keine Pause
+version = "0.2_gentoo"
                      
-color = False        # Wenn True werden die Treffer Rot eingefärbt
+color = 1
 
-treffer_page = 50    # Wie viele Treffer sollen auf einer Page angezeigt werden?
+blacklist = ["\.pds"]                  # Dateien, auf die dieses Pattern passt
+                                       # werden nicht indexiert
 
-tage = 7             # Alle wie viel Tage soll ein neues Index erstellt werden
+whitelist =  []    # Hebt die Vorgaben der Blacklist auf
 
-blacklist = []       # index all
+cache_path = "/var/cache"
 
-direct_new_cache = 1 # Erstellt nach dem Index Prozess eine neue Cache Datei
+root_directory = "/"
 
 
-# Bausteine:
-# Blacklist mit Sachen die man normalerweise nicht braucht^^
-#blacklist = ["etc", "usr", "man", "dev", "initrd", "opt", "proc", "root", "sbin", "srv", "sys"]
+# pfad = "/home/sigma/work/pythondesktopsearch" # Installationsort
+
+
+# Ab hier bitte nichts mehr ändern!
+from os.path import join
+import re
+
+blacklist = [re.compile(i) for i in blacklist]
+whitelist = [re.compile(i) for i in whitelist]
+
+del re
+
+index_file = join (cache_path, "index.pds")
+
+# blacklist = ["etc", "usr", "man", "dev", "initrd", "opt", "proc", "root", "sbin", "srv", "sys"]
