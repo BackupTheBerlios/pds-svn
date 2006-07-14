@@ -1,0 +1,148 @@
+//=======================\\
+||=======================||===============\\
+|| PythonDesktopSearch   ||===============||
+|| (c) by SigMA 2006     || Version 0.2.0 ||=====\\
+|| Herrausgegeben unter  ||===============||=====||
+||     der GPL v2        ||http://pds.berlios.de ||
+||=======================||======================||
+|| herrausgegeben am:    || 19-06-2006           ||
+||=======================||======================||
+\\===============================================//
+
+ Hinweis bei Update von 0.1.1 auf 0.2:
+-=======================================-
+ Wie man in der Changelog sehen kann gibt es sehr viele Änderungen. Deswegen ist
+ zu empfehlen, dass man vorher den alten Ordner löscht und einen neuen erstellt.
+ Desweiteren ist zu beachten, das der Indexer nun den INDEX in /var/cache ablegt.
+ (Es kann in der config.py geändert werden) Dies verlangt, dass der Indexer mit
+ ROOT Rechten gestartet werden muss.
+
+ So geht es:
+-=============-
+ > über prüfen Sie die config.py
+ > starten Sie pyindex.py
+    > warten sie ca 6 Minuten
+ > starten Sie dann die pyfind.py
+    > mit -c oder --command für die interne CommandLine
+    > mit SUCHWORT für die Direktsuche
+
+ System Anforderungen:
+-=======================-
+ 20 MBS peicherplatz (reicht für ca 250.000 Dateien)
+ Python2.4
+   mit folgenden Modulen:
+    > cPickle oder Pickle
+    > os.path
+    > glob
+    > mimetypes
+    > xml.dom
+ 80 MB RAM
+
+  Tipps
+-========-
+ Diese Tipps beziehen sich in erster Linie nur auf Unix Systeme
+ 
+ (*) Machen sie ihre Suchanfrage mit "| less" am Ende um alle Ergebnisse 
+     nochmal in Ruhe sich anzuschauen
+ (*) Wenn Sie eine XML Datei mit den Ergebnissen generieren wollen machen Sie es einfach
+     wie folgt:
+        pyfind --xml SUCHWORT > XMLDATEI.xml
+
+  Eintrag in die .bashrc
+-============================-
+ Fügen Sie einfach die Nachfolgenden 3 Zeilen in ihre ~/.bashrc ein
+ 
+    # PythonDesktopSearch
+    alias pyfind="python /IHR/PFAD/ZU/DER/PYTHONDESKTOPSEARCH/pyfind.py"
+    # / PythonDesktopSearch
+ 
+ starten sie nun einfach das Terminal neu und Sie können mit
+ 
+    pyfind SUCHWORT
+ 
+ die Suche von jedem Ort auf der Festplatte starten.
+ 
+  Eigene Handler schreiben
+-============================-
+ Wer selbst einen Handler für die PythonDesktopSearch schreiben will darf das gerne
+ tuen. Erstellt einfach im Ordner "handler" eine Datei "DATEIENDUNG_handler.py"
+ Öffnet diese mit einem Editor
+ Die Dateien sind wie folgt aufgebaut:
+    
+    import WICHTIGER ANDERER MODULE
+
+    mime_type = "audio/mpeg" # Hier kommt der MimeType rein für was dieser Handler gilt
+
+    def keywords(datei): # Funktion "keywords" die "datei" entgegen nimmt
+        keys = []        # erstellung der Liste Keys
+        [......]         # parst aus der Datei die Keys
+        return(keys)     # gibt die Liste der Keys zurück
+ 
+ Sollten Sie einen funktionierenden Handler schreiben oder einen vorhandenen Verbessern
+ wäre es nett, wenn Sie mir die Veränderte Datei per Mail schicken:
+    sigmahlm@gmail.com  Betreff: PDS - Handler: HANDLERTYP
+
+  Changelog:
+-============-
+ 19.06.06 - Version 0.2
+    > Umschreiben des Codes
+        > Dynamischer Aufbau
+    > Aufteilung der Funktionen
+        > pyfind.py     Die "eigentliche" Suche
+        > pds.py        Die ganzen Suchfunktionen
+        > pyindex.py    Der Indexer
+        > config.py     Die Config Datei
+        > lyp.py        Die lyp mit cout()
+    > Cache Datei wird standartmäßig in /var/cache gelegt
+        > der Indexer braucht daher ___ROOT___ Rechte
+    > Neues Cache Datei Format
+        > zwingendes neu Indexieren
+    > Automatisches Generieren von Keywords für:
+        > mp3 Dateien
+        > html Dateien
+        > abw Dateien
+    > Beliebig erweiterbarer Handler s.o.
+    > XML Output
+    > "pyfind SUCHWORT" sucht nun direkt
+    > whitelist
+    > Whitelist und Blacklist können nun Reguläre Ausdrücke enthalten
+       
+ 13.06.06 - Version 0.1.1
+    > Umstellung von SQLite auf cPickle
+    > Bug #7855 entfernt
+    > neueFlags
+    > Seitenanzahlanzeige
+    > diverse SpeedHacks
+    > VersionsCheck
+
+ 11.06.06 - Version 0.1
+    > Optimierung der Prozesse
+    > leichte Änderungen am Design
+    > ordentliche Readme
+    > Auslagerung der Blacklist in die config.py
+    > eingebauter VersionsCheck
+    > Anlegung einer ToDo Liste^^
+    > Entfernung von einem Bug
+ 
+ 09.06.06-Version0.1beta
+    > Die erste funktionierende Version
+ 
+  Geplant
+-=========-
+  Die größeren Meilensteine für die PythonDesktopSearch sind:
+    > Webinterface
+    > GAIM Logs Archivieren
+    > Thunderbird Mail Archivieren
+    > Daemon
+    > verschiedene Backends (zB: mysql, sqllite, pickle, cPickle)
+    > GUI
+ 
+  BekannteBugs:
+-================-
+  --keine--
+  
+  Danksagungen
+-==============-
+ > Dem QuodLibet Projekt für den dynamischen Import Modul Code
+ > Ned Batchelder für den id3reader
+ > milez für die Optimierung des Codes
