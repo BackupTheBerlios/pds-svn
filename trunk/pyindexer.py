@@ -23,23 +23,27 @@ import time
 import mimetypes
 from os.path import join, getsize
 import sys
+import thread
+
 
 try:
-    import cPickle as pickle
-except ImportError:
-    import pickle
+    import psyco
+    psyco.profile()
+except:
+    pass
+
+
 # / Python
 
 # extra
 import handler
 from lyp import *
-import pds
 import config
+from backends import *
 # / extra
 # / IMPORT
 
 # ToDo
-# > Keywords bauen (im mom ist das Filename)
 # > Blacklist Ordner gar nicht scannen! >> Speed
 # >> Idee für Geschwindigkeit
     # For Schleifen bauen die immer
@@ -56,18 +60,41 @@ class Indexer:
     Indexer der PythonDesktopSearch
     """
     def __init__(self):
+        self.warteliste = []
         self.keywords = []
+        self.threads = 0
+        self.do = 0
 #        try:
 #           self.files, self.oldkeywords = pds.load_index (config.index_file)[0]
 #        except:
         self.files, self.oldkeywords = [], []
+    
+    def scan_with_threads(self, arg, dirname, files):
+        self.warteliste.append((arg, dirname, files))
+        if self.do == 0:
+            print "Start Thread"
+            self.do = 1
+            thread.start_new_thread(self._thread_scan, ())
+        
+    def _thread_scan(self):
+        """
+        Diese Funktion arbeitet die Warteschlange
+        mit X Threads ab
+        """
+        while self.do == 1:
+            for i in self.warteliste:
+                if self.threads <= config.threads:
+                    self.threads += 1
+                    thread.start_new_thread(self._makelist, i)
+                    self.warteliste.remove(i)
+                
 
     def _makelist(self, arg, dirname, files):
-        if self._check_bw_lists(directory = dirname, filename = ""):
+        if self._check_bw_lists("", dirname):
             keywords = self.keywords # |- Speed
             filesback = self.files   # |- Hack
             for i in files:
-                if not self._check_bw_lists(directory = dirname, filename = i):
+                if not self._check_bw_lists(i, dirname):
                     continue
                 key = []
                 filename = join (dirname, i)
@@ -83,13 +110,20 @@ class Indexer:
                     pass
                 key.append(i)
                 keywords.append(key)
-            self.keywords = keywords # |- Speed
-            self.files = filesback   # |- Hack
+            self.keywords = keywords # |- Ende Speed
+            self.files = filesback   # |-    Hack
+            self.threads -= 1
             del keywords             # |- Myll
             del filesback            # |- Myll
+            
 
     def scan(self, root = config.root_directory):
-        os.path.walk(root, self._makelist, "")
+        if config.threads != 0:
+            os.path.walk(root, self.scan_with_threads, "")
+
+            self.do = 0
+        else:
+            os.path.walk(root, self._makelist, "")
         return (IndexHeader(root), self.files, self.keywords)
 
     def _check_bw_lists(self, filename, directory):
@@ -106,14 +140,21 @@ class Indexer:
         
 if __name__ == "__main__":
     cout("Stellen Sie bitte sicher, dass sie den Indexer mit ROOT Rechten gestartet haben! \
-    Drücken Sie sonst [CTRG] + [C] zum Abbrechen um ihn erneut mit ROOT Rechten zu starten!","hinweis")
+    Drücken Sie sonst [STRG] + [C] zum Abbrechen um ihn erneut mit ROOT Rechten zu starten!","hinweis")
+    backend = backend("pickle") # Setzt das Backend
+    backend.opendb()            # Öffnet die DB
+    
     starttime = time.time() # Startet die Uhr
 
     index = Indexer()       # Definiert den Indexer
     db = index.scan()       # startet den Scan Forgang
+    backend.writedb(db)
+    backend.closedb()
     
-    pickle.dump(db, file(config.index_file, "w"),-1)   # Schreibt die DB
-
+    try:
+        os.remove(config.cache_file)
+    except:
+        pass
     end = time.time() - starttime   # Endet die Zeit nahme
 
     cout(str(len(index.files)) + " Dateien indexiert")

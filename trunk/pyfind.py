@@ -23,6 +23,13 @@ from pds import *
 
 import config
 
+try:
+    import psyco
+    psyco.profile()
+except:
+    pass
+    
+    
 def command():
     pds = Finder()
     anfrage = " "
@@ -48,6 +55,9 @@ def docolor(req):
 def doxml(req):
     cout (pds.search_xml(req))
 
+def dorealtime():
+    typ = "realtime"
+
 def doplain(req):
     for i in pds.search(req):
         cout(i)
@@ -61,23 +71,28 @@ class set_output:
 
 if __name__ == "__main__":
     output = docolor
+    
+    typ = "index"
 
     long_options = {
             "command" : command,
             "nocolor" : set_output (doplain),
-            "xml" : set_output (doxml)
+            "xml" : set_output (doxml),
+            "realtime":dorealtime
             }
 
     short_options = {
             "c" : "command",
             "C" : "nocolor",
-            "x" : "xml"
+            "x" : "xml",
+            "rt": "realtime",
             }
 
     description = {
             "command" : "Startet die Kommandozeile",
             "nocolor" : "Farbausgabe",
-            "xml" : "XML Daten ausgeben"
+            "xml" : "XML Daten ausgeben",
+            "realtime" : "Durchsucht das Verzeichniss in Echtzeit"
             }
 
     def usage():
@@ -125,8 +140,9 @@ if __name__ == "__main__":
             else:
                 req += i
         else:
-            req = req + " " + i
+            req.join(i)
     
-    pds = Finder()
+    pds = Finder(typ)
     output(req)
+        
 

@@ -25,5 +25,3 @@ i.attributes["style"].value == "Heading 4"]:
     del tmp
     return(keys)
 
-if __name__ == "__main__":
-    print keywords("/home/sigma/work/pythondesktopsearch/mime_testfiles/abiword.abw")

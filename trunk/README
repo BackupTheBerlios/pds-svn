@@ -1,43 +1,67 @@
+
 //=======================\\
 ||=======================||===============\\
 || PythonDesktopSearch   ||===============||
-|| (c) by SigMA 2006     || Version 0.2.0 ||=====\\
+|| (c) by SigMA 2006     || Version 0.2.1 ||=====\\
 || Herrausgegeben unter  ||===============||=====||
 ||     der GPL v2        ||http://pds.berlios.de ||
 ||=======================||======================||
-|| herrausgegeben am:    || 19-06-2006           ||
+|| herrausgegeben am:    || 17-07-2006           ||
 ||=======================||======================||
 \\===============================================//
 
- Hinweis bei Update von 0.1.1 auf 0.2:
+ Hinweis bei Update von 0.2 auf 0.2.1:
 -=======================================-
- Wie man in der Changelog sehen kann gibt es sehr viele Änderungen. Deswegen ist
- zu empfehlen, dass man vorher den alten Ordner löscht und einen neuen erstellt.
- Desweiteren ist zu beachten, das der Indexer nun den INDEX in /var/cache ablegt.
- (Es kann in der config.py geändert werden) Dies verlangt, dass der Indexer mit
- ROOT Rechten gestartet werden muss.
+ Es gibt keine Neuerungen, die es Notwendig machen den Index neuzuerstellen.
+ Die Änderungen sind nur Kleinigkeiten, die hoffentlich die Suche ansich schneller
+ machen. So wird ab Version 0.2.1 Psyco und Threading unterstützt.
+ Das Threading ist jedoch im Moment noch ausgeschaltet, da es noch nicht
+ so ganz mit Psyco laufen will.
+ Psyco wird automatisch benutzt sobald es installiert ist. Sollte es nicht installiert
+ sein wird es einfach ignoriert.
+ Außerdem gibt es jetzt eine Echtzeitsuche, die jeder noch im alpha Stadium und
+ nicht für ungeduldige zu empfehlen ist.
+ Eine praktische Neuerung ist der Suchcache. Dies cached alle Suchanfrage und
+ gibt bei erneuter Anfrage diese raus, anstatt die große Index File zu laden.
 
  So geht es:
 -=============-
  > über prüfen Sie die config.py
  > starten Sie pyindex.py
-    > warten sie ca 6 Minuten
+    > warten Sie bis der Vorgang zu Ende gelaufen ist
  > starten Sie dann die pyfind.py
     > mit -c oder --command für die interne CommandLine
     > mit SUCHWORT für die Direktsuche
 
  System Anforderungen:
 -=======================-
- 20 MBS peicherplatz (reicht für ca 250.000 Dateien)
+ 20 MB Speicherplatz (reicht für ca 250.000 Dateien)
  Python2.4
    mit folgenden Modulen:
-    > cPickle oder Pickle
+    > Pickle
     > os.path
     > glob
     > mimetypes
     > xml.dom
+   optinonal:
+    > cPickle
+    > thread
+    > psyco
+    
  80 MB RAM
 
+  Perfomance
+-============-
+ Testrechner: AMD Duron 1000+, 313 RAM, Ubuntu Linux 6.10
+ Backend: cPickle
+ 
+ ( Gemessen in Sekunden )
+ 
+ Bei 24 689 Dateien:
+             ohne Psyco     mit Psyco        Differenz
+ 24 689  _|_   32.09     _|_   38.30    _|_     6,21
+ 229 818 _|_   294.7     _|_   321.78   _|_     27,08
+ 
   Tipps
 -========-
  Diese Tipps beziehen sich in erster Linie nur auf Unix Systeme
@@ -84,6 +108,16 @@
 
   Changelog:
 -============-
+ 17.07.06 - Version 0.2.1
+    > Backendmodule
+        > pickle / cPickle
+        > sqlite (Alpha - suchen damit noch nicht möglich)
+    > Suchcache
+    > Echtzeitsuche (alpha)
+    > Threading bei Indexer (alpha)
+        > einstellbar in config.py
+    > Psyco unterstützung
+
  19.06.06 - Version 0.2
     > Umschreiben des Codes
         > Dynamischer Aufbau
@@ -129,20 +163,26 @@
  
   Geplant
 -=========-
-  Die größeren Meilensteine für die PythonDesktopSearch sind:
-    > Webinterface
-    > GAIM Logs Archivieren
-    > Thunderbird Mail Archivieren
+  Für weitere 0.2 Versionen:
+    > GAIM Log Archivierung
+    > Backend erweiterung
+    > Thunderbird Mail
+    > Verbessertes Threading
+  
+  Version 0.3:
+    > Webinterface / GUI
     > Daemon
-    > verschiedene Backends (zB: mysql, sqllite, pickle, cPickle)
-    > GUI
+ 
+  Irgendwann geplant:
+    > Internetupdate
  
   BekannteBugs:
 -================-
-  --keine--
+  >> Suche bei sqlite funktioniert noch nicht
   
   Danksagungen
 -==============-
+ > Den Usern für die Benutzung
  > Dem QuodLibet Projekt für den dynamischen Import Modul Code
  > Ned Batchelder für den id3reader
  > milez für die Optimierung des Codes
